@@ -1,195 +1,799 @@
 <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta charset="utf-8">
-<title>Deep Dive: Building the Quiz Master App</title>
+<title>Quiz Master Mini Lab Project Report</title>
 <style>
-  body { 
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif; 
-    line-height: 1.8; 
-    color: #2D3748; 
-    margin: 40px auto; 
-    max-width: 900px; 
-    padding: 20px;
-    background-color: #ffffff;
+  @page {
+    size: A4;
+    margin: 1in;
   }
-  h1 { 
-    color: #1A365D; 
-    font-size: 2.5em; 
-    border-bottom: 3px solid #3182CE; 
-    padding-bottom: 10px; 
-    margin-bottom: 20px;
+  body {
+    font-family: "Times New Roman", serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #111111;
+    margin: 0 auto;
+    max-width: 900px;
+    background: #ffffff;
   }
-  h2 { 
-    color: #2B6CB0; 
-    font-size: 1.8em; 
-    margin-top: 40px; 
-    border-bottom: 1px solid #E2E8F0;
-    padding-bottom: 8px;
+  .page {
+    page-break-after: always;
+    padding: 28px 40px;
   }
-  h3 { 
-    color: #2C5282; 
-    font-size: 1.4em; 
-    margin-top: 30px;
+  .page:last-child {
+    page-break-after: auto;
   }
-  p { 
-    font-size: 1.1em; 
-    margin-bottom: 20px;
+  .center {
+    text-align: center;
   }
-  ul, ol { 
-    font-size: 1.1em; 
-    margin-bottom: 20px; 
-    padding-left: 30px;
+  .right {
+    text-align: right;
   }
-  li { 
-    margin-bottom: 10px; 
+  .justify {
+    text-align: justify;
   }
-  table { 
-    border-collapse: collapse; 
-    width: 100%; 
-    margin-top: 25px; 
-    margin-bottom: 25px;
+  h1, h2, h3, h4 {
+    margin: 0 0 12px 0;
+    font-weight: bold;
   }
-  th, td { 
-    border: 1px solid #CBD5E0; 
-    padding: 12px; 
-    text-align: left; 
+  h1 {
+    font-size: 18pt;
+    text-align: center;
+    margin-bottom: 18px;
   }
-  th { 
-    background-color: #EDF2F7; 
-    font-weight: 600; 
-    color: #2D3748;
+  h2 {
+    font-size: 16pt;
+    margin-top: 18px;
   }
-  code { 
-    background-color: #EDF2F7; 
-    color: #E53E3E;
-    padding: 3px 6px; 
-    border-radius: 4px; 
-    font-family: 'Consolas', 'Courier New', monospace; 
-    font-size: 0.9em;
+  h3 {
+    font-size: 14pt;
+    margin-top: 16px;
   }
-  .highlight-box {
-    background-color: #F0F4F8;
-    border-left: 5px solid #3182CE;
-    padding: 20px;
-    margin: 30px 0;
-    border-radius: 0 8px 8px 0;
+  h4 {
+    font-size: 12.5pt;
+    margin-top: 12px;
   }
-  .quote {
+  p {
+    margin: 0 0 12px 0;
+  }
+  ul, ol {
+    margin: 0 0 12px 24px;
+  }
+  li {
+    margin-bottom: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 18px 0;
+  }
+  th, td {
+    border: 1px solid #000000;
+    padding: 8px;
+    vertical-align: top;
+  }
+  th {
+    background: #f2f2f2;
+    text-align: left;
+  }
+  .spacer-1 { height: 18px; }
+  .spacer-2 { height: 32px; }
+  .spacer-3 { height: 56px; }
+  .spacer-4 { height: 96px; }
+  .signature-block {
+    width: 100%;
+    margin-top: 12px;
+  }
+  .signature-box {
+    width: 46%;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 3%;
+  }
+  .line {
+    border-top: 1px solid #000000;
+    margin: 26px 0 8px 0;
+  }
+  .small {
+    font-size: 11pt;
+  }
+  .chapter-title {
+    text-align: center;
+    font-size: 16pt;
+    font-weight: bold;
+    margin-bottom: 14px;
+  }
+  .toc td:first-child {
+    width: 78%;
+  }
+  .toc td:last-child {
+    width: 22%;
+    text-align: right;
+  }
+  .figure-box {
+    border: 1px solid #000000;
+    padding: 14px;
+    margin: 14px 0 10px 0;
+    background: #fafafa;
+  }
+  .caption {
+    text-align: center;
     font-style: italic;
-    color: #4A5568;
-    border-left: 4px solid #A0AEC0;
-    padding-left: 15px;
-    margin: 20px 0;
+    margin-bottom: 12px;
   }
 </style>
 </head>
 <body>
 
-<h1>Deep Dive: Building the Quiz Master App</h1>
-<p class="quote">A comprehensive, blog-style technical report detailing the architecture, features, and engineering decisions behind the Quiz Master platform.</p>
+<div class="page">
+  <div class="center">
+    <h1>Quiz Master</h1>
+    <p><strong>Submitted By</strong></p>
+    <div class="spacer-1"></div>
+    <p><strong>Samiul Hasan Sakib</strong></p>
+    <p><strong>Student ID:</strong> 22205101472</p>
+    <div class="spacer-3"></div>
+    <p><strong>MINI LAB PROJECT REPORT</strong></p>
+    <p>This Report Presented in Partial Fulfillment of the course</p>
+    <p><strong>Mobile Application Development</strong></p>
+    <p>in the Department of Computer Science and Engineering</p>
+    <div class="spacer-4"></div>
+    <p><strong>DAFFODIL INTERNATIONAL UNIVERSITY</strong></p>
+    <p>Dhaka, Bangladesh</p>
+    <p>April 21, 2026</p>
+  </div>
+</div>
 
-<h2>1. Introduction: The Vision</h2>
-<p>
-  The modern educational landscape requires tools that are not only reliable but also fast and accessible. The <strong>Quiz Master App</strong> was conceived with a clear goal: to create a robust, role-based examination portal that functions flawlessly without the need for an active internet connection or a complex cloud backend. 
-</p>
-<p>
-  By leveraging the power of Flutter and local device storage, Quiz Master delivers a complete ecosystem. It offers a dedicated administration panel for teachers to curate content and a streamlined, intuitive interface for students to test their knowledge, complete with an intelligent local AI analyzer that provides personalized feedback.
-</p>
-
-<h2>2. The Technology Stack</h2>
-<p>Choosing the right tools was critical for ensuring performance and maintainability:</p>
-<ul>
-  <li><strong>Frontend Engine: Flutter & Dart.</strong> Flutter was chosen for its ability to compile to native machine code, providing buttery-smooth 60fps performance and a beautiful Material Design 3 interface.</li>
-  <li><strong>State Management: <code>ChangeNotifier</code>.</strong> Instead of relying on heavy third-party libraries like BLoC or Riverpod, the app utilizes Flutter's native <code>ChangeNotifier</code>. This keeps the codebase lightweight and beginner-friendly while effectively managing the reactive UI updates.</li>
-  <li><strong>Data Persistence: <code>shared_preferences</code>.</strong> Since the app is "offline-first", it serializes all complex data (users, question banks, exam histories, and settings) into a comprehensive JSON tree and securely writes it to the device's local storage.</li>
-</ul>
-
-<h2>3. Core Architecture: How It All Connects</h2>
-<p>The application follows a clean separation of concerns, heavily inspired by the Model-View-Controller (MVC) pattern.</p>
-
-<div class="highlight-box">
-  <h3>The Brain: <code>AppController</code></h3>
-  <p>
-    Located in <code>lib/controllers/app_controller.dart</code>, this class is the heart of the application. It holds the entire state of the platform in memory—lists of users, questions, exam attempts, and platform settings. 
+<div class="page">
+  <h1>DECLARATION</h1>
+  <p class="justify">
+    I hereby declare that this lab project has been completed by me under the
+    supervision of <strong>Md Umaid Hasan, Lecturer, Department of Computer Science and Engineering,
+    Daffodil International University</strong>. I also declare that neither this project nor any part
+    of this project has been submitted elsewhere as a lab project, thesis, internship report,
+    or research work.
   </p>
-  <p>
-    Whenever a student finishes an exam or an admin adds a question, they interact with the <code>AppController</code>. The controller then updates its internal lists, triggers <code>notifyListeners()</code> to automatically rebuild the UI, and simultaneously calls the <code>LocalStorageService</code> to save the new state to the device memory.
+
+  <div class="spacer-2"></div>
+  <p><strong>Submitted To:</strong></p>
+  <div class="spacer-1"></div>
+  <p><strong>Md Umaid Hasan</strong><br>
+  Lecturer<br>
+  Department of Computer Science and Engineering<br>
+  Daffodil International University</p>
+
+  <div class="spacer-2"></div>
+  <p><strong>Submitted By:</strong></p>
+  <div class="spacer-1"></div>
+  <p><strong>Samiul Hasan Sakib</strong><br>
+  Student ID: 22205101472<br>
+  Dept. of CSE, DIU</p>
+  <div class="line"></div>
+  <p class="small">Signature of the Student</p>
+</div>
+
+<div class="page">
+  <h1>COURSE &amp; PROGRAM OUTCOME</h1>
+  <p class="justify">
+    The following course outcomes are aligned with the mini lab project and are reflected
+    through problem analysis, system design, implementation, evaluation, and documentation.
+  </p>
+
+  <p><strong>Table 1: Course Outcome Statements</strong></p>
+  <table>
+    <tr>
+      <th>CO's</th>
+      <th>Statements</th>
+    </tr>
+    <tr>
+      <td>CO1</td>
+      <td>Analyze mobile application requirements and design an appropriate software architecture, data model, and user flow for a role-based academic system.</td>
+    </tr>
+    <tr>
+      <td>CO2</td>
+      <td>Implement a cross-platform mobile application using Flutter, modern UI design practices, asynchronous programming, and Firebase-based backend integration.</td>
+    </tr>
+    <tr>
+      <td>CO3</td>
+      <td>Evaluate the completed mobile solution in terms of usability, performance, testing, security, and professional engineering practice for real educational deployment.</td>
+    </tr>
+  </table>
+
+  <h2>Table of Contents</h2>
+  <table class="toc">
+    <tr><td>Declaration</td><td>i</td></tr>
+    <tr><td>Course &amp; Program Outcome</td><td>ii</td></tr>
+    <tr><td>Chapter 1: Introduction</td><td>1</td></tr>
+    <tr><td>Introduction</td><td>1</td></tr>
+    <tr><td>Motivation</td><td>1</td></tr>
+    <tr><td>Objectives</td><td>1</td></tr>
+    <tr><td>Feasibility Study</td><td>2</td></tr>
+    <tr><td>Gap Analysis</td><td>2</td></tr>
+    <tr><td>Project Outcome</td><td>2</td></tr>
+    <tr><td>Chapter 2: Proposed Methodology/Architecture</td><td>3</td></tr>
+    <tr><td>Requirement Analysis &amp; Design Specification</td><td>3</td></tr>
+    <tr><td>Overview</td><td>3</td></tr>
+    <tr><td>Proposed Methodology / System Design</td><td>3</td></tr>
+    <tr><td>UI Design</td><td>4</td></tr>
+    <tr><td>Overall Project Plan</td><td>4</td></tr>
+    <tr><td>Chapter 3: Implementation and Results</td><td>5</td></tr>
+    <tr><td>Implementation</td><td>5</td></tr>
+    <tr><td>Performance Analysis</td><td>5</td></tr>
+    <tr><td>Results and Discussion</td><td>6</td></tr>
+    <tr><td>Chapter 4: Engineering Standards and Mapping</td><td>7</td></tr>
+    <tr><td>Impact on Society, Environment and Sustainability</td><td>7</td></tr>
+    <tr><td>Project Management and Team Work</td><td>8</td></tr>
+    <tr><td>Complex Engineering Problem</td><td>8</td></tr>
+    <tr><td>Mapping of Program Outcome</td><td>8</td></tr>
+    <tr><td>Complex Problem Solving</td><td>9</td></tr>
+    <tr><td>Engineering Activities</td><td>10</td></tr>
+    <tr><td>Chapter 5: Conclusion</td><td>11</td></tr>
+    <tr><td>Summary</td><td>11</td></tr>
+    <tr><td>Limitation</td><td>11</td></tr>
+    <tr><td>Future Work</td><td>11</td></tr>
+    <tr><td>References</td><td>12</td></tr>
+  </table>
+</div>
+
+<div class="page">
+  <div class="chapter-title">Chapter 1<br>Introduction</div>
+  <p class="justify">
+    This chapter presents the background, motivation, objectives, feasibility, identified gaps,
+    and expected outcomes of the Quiz Master project. It establishes why the project is relevant
+    in the context of digital learning, assessment automation, and mobile software engineering.
+  </p>
+
+  <h2>Introduction</h2>
+  <p class="justify">
+    Quiz Master is a role-based mobile examination and practice platform built with Flutter and Firebase.
+    The project addresses a common academic need: teachers or administrators require a structured way
+    to configure quizzes, control exam policies, manage question banks, and monitor student progress,
+    while students need a simple and responsive platform to practice, attend exams, review results, and
+    track their performance over time. The system provides separate workflows for admin and student users
+    and integrates authentication, real-time cloud data management, and profile personalization.
+  </p>
+  <p class="justify">
+    The project solves the problem of fragmented classroom assessment by combining quiz delivery, result
+    generation, leaderboard tracking, progress visualization, and profile management in a single mobile-first
+    environment. By using Flutter, the same codebase can support Android, iOS, web, macOS, and other desktop
+    platforms with a consistent interface.
+  </p>
+
+  <h2>Motivation</h2>
+  <p class="justify">
+    The primary motivation behind this project is to develop a practical mobile application that demonstrates
+    the full lifecycle of a modern software product: requirement analysis, UI design, role-based access control,
+    cloud integration, testing, and deployment readiness. Traditional academic quiz systems are often either
+    too static, too web-dependent, or not tailored for small-scale classroom administration. Quiz Master was
+    motivated by the need for a cleaner, more controllable, and more student-friendly solution.
+  </p>
+  <p class="justify">
+    From a learning perspective, the project also provided the opportunity to apply mobile application concepts
+    such as reactive UI updates, asynchronous programming, Firebase-based backend services, image selection,
+    data modeling, and result analytics. The system benefits the developer by translating classroom concepts into
+    a working software product and benefits end users by simplifying assessment management.
+  </p>
+
+  <h2>Objectives</h2>
+  <ol>
+    <li>To design and implement a role-based quiz and examination portal using Flutter.</li>
+    <li>To provide secure user authentication and cloud-backed profile management using Firebase services.</li>
+    <li>To allow administrators to create, manage, and remove quiz questions from a centralized question bank.</li>
+    <li>To allow administrators to configure exam title, duration, question count, attempt limits, practice mode, and review behavior.</li>
+    <li>To enable students to attend timed exams and topic-based practice sessions from a single interface.</li>
+    <li>To generate immediate score summaries, answer reviews, and AI-style recommendations after quiz completion.</li>
+    <li>To visualize progress using attempt history, subject-wise performance, and leaderboard data.</li>
+    <li>To support profile customization, including profile information and profile picture management.</li>
+    <li>To validate the application through static analysis and automated Flutter test cases.</li>
+  </ol>
+
+  <h2>Feasibility Study</h2>
+  <p class="justify">
+    Similar systems already exist in the educational technology domain. Learning management systems such as Moodle
+    provide assessment modules but are often institution-heavy and require more administrative configuration than
+    small classes need. Lightweight quiz systems such as Google Forms support quick testing but offer limited role-based
+    exam governance and weak analytics for subject-wise performance. Gamified platforms such as Quizizz and Kahoot
+    are effective for engagement but may not align with stricter classroom exam control and custom institutional needs [1][2][3].
+  </p>
+  <p class="justify">
+    From a technical perspective, the feasibility of building Quiz Master is high because Flutter provides a mature
+    cross-platform UI toolkit, while Firebase offers ready-made services for authentication, cloud data synchronization,
+    and media storage. The repo confirms the practical feasibility: the application initializes Firebase, routes users
+    through an app shell, stores questions, attempts, settings, and user profiles in cloud collections, and already passes
+    analysis and automated test checks.
+  </p>
+
+  <h2>Gap Analysis</h2>
+  <p class="justify">
+    Existing systems often separate content management, testing, analytics, and user personalization into different tools.
+    Quiz Master addresses this gap by combining them in a single mobile application. Another gap is the lack of lightweight,
+    mobile-first assessment apps that offer both administrator control and student autonomy. Many existing tools either focus
+    on large enterprise learning platforms or purely casual quiz interaction. Quiz Master occupies a middle ground by providing
+    structured exam control, practice flexibility, and progress analytics in a compact academic product.
+  </p>
+  <p class="justify">
+    The current work also improves on earlier offline or local-only approaches by using Firebase Auth, Cloud Firestore, and
+    Firebase Storage. This removes device-only limitations, allows account continuity across sessions, and supports profile picture
+    features that require real media handling.
+  </p>
+
+  <h2>Project Outcome</h2>
+  <p class="justify">
+    The project outcome is a functional, multi-screen mobile application that supports two types of users: administrators and
+    students. Administrators can manage questions, configure exams, observe leaderboards, and review overall progress. Students
+    can create accounts, sign in, edit profiles, upload profile pictures, practice by subject, attend timed exams, and receive
+    instant feedback through result summaries and AI-style recommendations.
+  </p>
+  <p class="justify">
+    A secondary outcome is academic: the project demonstrates practical application of software engineering principles such as
+    modular architecture, data modeling, validation, cross-platform UI development, and testing. It also produces a reusable
+    codebase that can be extended into a more complete institutional learning product.
   </p>
 </div>
 
-<h3>The Data Models (<code>lib/models/</code>)</h3>
-<p>Everything in the app is strongly typed using Dart classes with <code>toJson()</code> and <code>fromJson()</code> methods for seamless storage:</p>
-<ul>
-  <li><code>UserModel</code>: Distinguishes between <code>admin</code> and <code>student</code> roles. It holds authentication data, profile bios, and department info.</li>
-  <li><code>QuestionModel</code>: A flexible structure containing the subject category, the question text, exactly four options, the correct answer index, and an explanation for post-exam review.</li>
-  <li><code>ExamSettings</code>: A crucial model that acts as the "rules engine." It defines how many questions appear in an exam, the strict minute-based timer, maximum attempt limits, and boolean toggles for allowing practice modes or post-exam reviews.</li>
-  <li><code>ExamAttempt</code>: The historical record of a quiz. It captures the score, the mode (Practice vs. Real), the timestamp, and deeply nested lists of exactly which answers the user got right or wrong.</li>
-</ul>
+<div class="page">
+  <div class="chapter-title">Chapter 2<br>Proposed Methodology/Architecture</div>
+  <p class="justify">
+    This chapter describes the requirement analysis, design specification, system overview, proposed architecture,
+    user interface design, and overall project plan used to build Quiz Master. It translates the project goals into
+    concrete software structure and implementation strategy.
+  </p>
 
-<h2>4. The User Experience: Two Sides of the Coin</h2>
+  <h2>Requirement Analysis &amp; Design Specification</h2>
+  <h3>Functional Requirements</h3>
+  <ul>
+    <li>User registration and login with Firebase Authentication.</li>
+    <li>Role-based routing for admin and student dashboards.</li>
+    <li>Admin-controlled exam settings and question bank management.</li>
+    <li>Student practice mode and timed exam mode.</li>
+    <li>Leaderboard, attempt history, result review, and progress visualization.</li>
+    <li>User profile editing with image selection and profile picture saving.</li>
+    <li>Cloud data synchronization for users, questions, attempts, and settings.</li>
+  </ul>
 
-<h3>4.1 The Admin Perspective</h3>
-<p>
-  Upon logging in as an administrator (default: <code>admin@quizmaster.com</code>), the interface transforms into a command center. 
-</p>
-<ul>
-  <li><strong>Global Dashboard:</strong> Admins are greeted with high-level metrics—total enrolled students, total questions in the bank, and total platform-wide exam attempts.</li>
-  <li><strong>Visual Analytics:</strong> The app features a custom <code>ProgressVisualization</code> widget that graphs student performance and subject trends across the entire system.</li>
-  <li><strong>Exam Controls:</strong> Admins have real-time control. They can instantly alter the duration of the exam, change the number of questions, or enforce strict limits on how many times a student can take the test.</li>
-  <li><strong>Question Bank Management:</strong> A built-in CMS (Content Management System) allows admins to quickly draft new questions or purge outdated ones.</li>
-</ul>
+  <h3>Non-Functional Requirements</h3>
+  <ul>
+    <li>Responsive and clean UI across Flutter-supported platforms.</li>
+    <li>Reliable asynchronous data handling with clear error feedback.</li>
+    <li>Maintainable architecture with separated controller, models, services, screens, and widgets.</li>
+    <li>Security through authenticated access and Firebase rules for Firestore and Storage.</li>
+    <li>Testability through automated widget and controller tests.</li>
+  </ul>
 
-<h3>4.2 The Student Perspective</h3>
-<p>
-  Students (default: <code>student@quizmaster.com</code>) experience a distraction-free, focused learning environment.
-</p>
-<ul>
-  <li><strong>Practice vs. Real Exams:</strong> If enabled by the admin, students can enter "Practice Mode." This pulls questions but doesn't strictly log them on the main leaderboard, allowing for low-stress studying. When they are ready, they enter "Exam Mode," which triggers the strict countdown timer.</li>
-  <li><strong>Dynamic Question Pooling:</strong> Every exam is unique. The engine shuffles the admin's question bank and randomly selects the exact number of questions defined in the settings, ensuring students cannot simply memorize question orders.</li>
-  <li><strong>The Leaderboard:</strong> Gamification drives engagement. Students can view a global leaderboard that ranks participants based on accuracy and completion speed.</li>
-</ul>
+  <h2>Overview</h2>
+  <p class="justify">
+    The application starts in <strong>main.dart</strong>, where Firebase is initialized using generated platform options.
+    After startup, <strong>QuizMasterApp</strong> creates an <strong>AppController</strong> and passes it to the <strong>AppShell</strong>.
+    The app shell works as a gateway. It shows a loading screen during initialization, an error screen if backend access fails,
+    an authentication screen when no user is signed in, and the appropriate dashboard when a user is authenticated.
+  </p>
 
-<h2>5. The Crown Jewel: The Local AI Analyzer</h2>
-<p>
-  One of the standout features of Quiz Master is the <strong>AiAnalyzer</strong> (located in <code>lib/utils/ai_analyzer.dart</code>). Instead of just giving a student a raw score (e.g., "4/5"), the app provides intelligent, contextual feedback.
-</p>
-<p>
-  <strong>How the Algorithm Works:</strong>
-</p>
-<ol>
-  <li>When an exam is submitted, the analyzer tallies the correct answers and groups them strictly by <em>Subject</em> (e.g., Math, Science, History).</li>
-  <li>It mathematically calculates the accuracy percentage for each individual subject.</li>
-  <li>It sorts these to definitively identify the student's <strong>Strongest Subject</strong> and <strong>Weakest Subject</strong>.</li>
-  <li>It generates a dynamic analysis. If accuracy is >80%, it returns "Excellent performance." If it's <50%, it returns "Needs more preparation."</li>
-  <li>Finally, it compiles a list of actionable recommendations, instructing the student exactly what subject to revise before their next attempt.</li>
-</ol>
-<p>
-  Because this entire process runs locally on the device's CPU, the feedback is generated instantly with zero latency and zero server costs.
-</p>
+  <h2>Proposed Methodology / System Design</h2>
+  <p class="justify">
+    The system follows a layered design inspired by MVC and repository-based patterns. Presentation logic is contained in screens
+    and widgets, state coordination is handled by the controller, and Firebase communication is isolated in repository/service code.
+    This reduces coupling and makes the code easier to extend and test.
+  </p>
 
-<h2>6. Routing and Security Flow</h2>
-<p>
-  Navigation is handled cleanly by the <code>AppShell</code> widget. It acts as a gatekeeper. By continuously observing the <code>AppController</code>, it ensures that:
-  <br><br>
-  <code>if (user == null) { return AuthScreen; }</code><br>
-  <code>if (user.isAdmin) { return AdminDashboardScreen; }</code><br>
-  <code>return HomeScreen; // For Students</code>
-  <br><br>
-  This strict conditional routing guarantees that students can never accidentally navigate into the administrative panels, and unauthenticated users are always caught at the login screen.
-</p>
+  <div class="figure-box">
+    <p><strong>Presentation Layer:</strong> AuthScreen, HomeScreen, AdminDashboardScreen, QuizScreen, ResultScreen, ProfileScreen</p>
+    <p><strong>State Layer:</strong> AppShell, AppController, ChangeNotifier-based updates</p>
+    <p><strong>Repository Layer:</strong> AppRepository interface and FirebaseAppRepository implementation</p>
+    <p><strong>Cloud Layer:</strong> Firebase Auth, Cloud Firestore, Firebase Storage</p>
+    <p><strong>Model Layer:</strong> UserModel, QuestionModel, ExamAttempt, ExamSettings</p>
+    <p><strong>Utility Layer:</strong> AI Analyzer, progress visualization, shared avatar widget</p>
+  </div>
+  <p class="caption">Figure 2.1: Simplified architecture of the Quiz Master system</p>
 
-<h2>7. Conclusion & Future Outlook</h2>
-<p>
-  The Quiz Master app demonstrates that powerful, feature-rich educational platforms do not always require heavy cloud infrastructure. By intelligently leveraging local storage, responsive state management, and algorithmic analysis, the app provides a premium experience for both educators and learners. 
-</p>
-<p>
-  It stands ready to be used as a robust internal tool, a classroom companion, or a foundation for even larger educational software projects.
-</p>
+  <p class="justify">
+    The controller listens to Firebase authentication state and then subscribes to cloud streams for users, questions, attempts,
+    and settings. This ensures the UI is updated reactively whenever backend data changes. The repository handles login, signup,
+    profile updates, image uploads, question management, settings updates, and attempt persistence. The design also allows future
+    replacement of the data source by keeping the controller dependent on an abstract repository contract.
+  </p>
 
-<br><hr><br>
-<p style="text-align: center; color: #718096; font-size: 0.9em;">
-  <em>Authored automatically based on the comprehensive architectural review of the Quiz Master App codebase.</em>
-</p>
+  <h3>Core Data Flow</h3>
+  <ol>
+    <li>User launches the app and Firebase initializes.</li>
+    <li>Authentication state determines whether the user sees login/signup or a dashboard.</li>
+    <li>After authentication, the controller loads Firestore-backed app data.</li>
+    <li>Admin updates or student attempts generate writes to Firestore and trigger UI refresh through streams.</li>
+    <li>Quiz completion generates local analysis results and then stores them as an attempt record.</li>
+    <li>Profile updates optionally upload a photo to Firebase Storage and save the returned URL in the user document.</li>
+  </ol>
+
+  <h2>UI Design</h2>
+  <p class="justify">
+    The UI design uses Material 3 principles with a soft indigo-based color scheme, rounded cards, generous whitespace, and
+    readable typography through Google Fonts. The authentication screen is designed to be simple and form-centric, while the
+    dashboards highlight actions and analytics. The admin dashboard emphasizes control and monitoring, whereas the student
+    dashboard emphasizes readiness, motivation, and guided practice.
+  </p>
+  <p class="justify">
+    Specific UI patterns include segmented buttons for login/signup and user role selection, cards for summarized metrics, filter
+    chips for topic-based practice preparation, circular avatar displays for profile identity, and progress bars/charts for academic
+    visualization. The recent profile picture feature extends this design by allowing users to pick, preview, change, and remove an
+    image from the profile screen with a consistent avatar widget across the application.
+  </p>
+
+  <h2>Overall Project Plan</h2>
+  <table>
+    <tr>
+      <th>Phase</th>
+      <th>Major Activities</th>
+      <th>Outcome</th>
+    </tr>
+    <tr>
+      <td>Planning</td>
+      <td>Requirement study, scope definition, user-role identification, template review</td>
+      <td>Project specification and functional scope</td>
+    </tr>
+    <tr>
+      <td>Design</td>
+      <td>Data model design, screen structure, Firebase selection, routing and architecture planning</td>
+      <td>System blueprint and UI structure</td>
+    </tr>
+    <tr>
+      <td>Implementation</td>
+      <td>Firebase integration, controller logic, dashboards, quiz flow, profile system, analytics</td>
+      <td>Working role-based mobile application</td>
+    </tr>
+    <tr>
+      <td>Testing</td>
+      <td>Static analysis, widget tests, controller behavior verification, iterative bug fixing</td>
+      <td>Validated and stabilized codebase</td>
+    </tr>
+    <tr>
+      <td>Documentation</td>
+      <td>Technical explanation, engineering mapping, academic reporting</td>
+      <td>Complete mini lab project report</td>
+    </tr>
+  </table>
+</div>
+
+<div class="page">
+  <div class="chapter-title">Chapter 3<br>Implementation and Results</div>
+  <p class="justify">
+    This chapter presents how the system was implemented, how the major modules work together, and what results were obtained
+    from the completed application. It also analyzes performance and discusses the practical behavior of the current version.
+  </p>
+
+  <h2>Implementation</h2>
+  <p class="justify">
+    The frontend was implemented in Flutter using a screen-based structure under the <strong>lib/screens</strong> directory.
+    The app includes separate screens for authentication, admin dashboard, student home dashboard, quiz interaction, result
+    display, and profile management. Common UI elements such as progress visualization and user avatars are placed in reusable
+    widgets. Application-wide navigation and state-driven view switching are managed through the app shell and controller.
+  </p>
+  <p class="justify">
+    On the backend side, Firebase services were integrated through a repository implementation. Firebase Authentication manages
+    account creation, login, logout, and basic user identity. Cloud Firestore stores user profiles, question banks, settings,
+    and attempt histories. Firebase Storage is used for profile image upload and retrieval. Firestore rules and storage rules are
+    included in the project to align data access with authenticated ownership and admin control.
+  </p>
+
+  <h3>Implemented Modules</h3>
+  <ul>
+    <li><strong>Authentication Module:</strong> Sign up, login, role assignment, and connection-aware routing.</li>
+    <li><strong>Admin Module:</strong> Question bank CRUD operations, exam control settings, student progress overview.</li>
+    <li><strong>Student Module:</strong> Topic selection, practice mode, exam mode, attempt history, and leaderboard.</li>
+    <li><strong>Result Analysis Module:</strong> Score calculation, subject-wise aggregation, and AI-style recommendations.</li>
+    <li><strong>Profile Module:</strong> Editable user profile fields, profile photo upload, change, and removal.</li>
+    <li><strong>Testing Module:</strong> Widget and controller tests for key behavior such as signup, routing, and attempt limits.</li>
+  </ul>
+
+  <h2>Performance Analysis</h2>
+  <p class="justify">
+    The application is lightweight from an algorithmic perspective. Core quiz scoring requires a single pass over the selected
+    question list, resulting in a time complexity of <strong>O(n)</strong> where <em>n</em> is the number of questions. Subject-wise
+    analysis and answer review generation also operate in linear time over the question set. Leaderboard generation depends on sorting
+    current exam attempts, which has <strong>O(m log m)</strong> complexity where <em>m</em> is the number of relevant attempts.
+  </p>
+  <p class="justify">
+    From a practical runtime perspective, Flutter provides smooth UI rendering, while Firebase handles cloud synchronization and
+    authentication asynchronously. The project does not currently include formal benchmark instrumentation, but code-level validation
+    confirms operational stability. Static analysis shows no issues, and automated tests verify core user flow correctness. The recent
+    architecture shift from local storage to Firebase also improves consistency across sessions and platforms.
+  </p>
+
+  <table>
+    <tr>
+      <th>Metric</th>
+      <th>Observation</th>
+    </tr>
+    <tr>
+      <td>Static Analysis</td>
+      <td><code>flutter analyze</code> completed successfully with no issues in the final validated state.</td>
+    </tr>
+    <tr>
+      <td>Automated Tests</td>
+      <td><code>flutter test</code> passed 5 key tests covering authentication flow, signup, exam attempts, and settings behavior.</td>
+    </tr>
+    <tr>
+      <td>Scoring Complexity</td>
+      <td>Linear, O(n), over total questions in an attempt.</td>
+    </tr>
+    <tr>
+      <td>Leaderboard Complexity</td>
+      <td>Sorting-based, O(m log m), over current exam attempts.</td>
+    </tr>
+  </table>
+
+  <h2>Results and Discussion</h2>
+  <p class="justify">
+    The final result is a working mobile application that demonstrates a complete educational assessment workflow. The admin can
+    configure the system and question bank without modifying source code. Students can create accounts, join the platform, take
+    practice sessions or exams, and receive immediate, meaningful feedback. The profile module extends usability by supporting
+    personalization and identity display.
+  </p>
+  <p class="justify">
+    A particularly strong outcome is the integration of analytics into a beginner-friendly mobile system. Rather than displaying only
+    a raw score, the application translates attempt data into suggestions and subject insights. This increases the educational value of
+    the app. Another successful outcome is the architecture itself: screens, controller logic, models, repository abstraction, and cloud
+    services are cleanly separated, which makes the project easier to maintain and improve.
+  </p>
+  <p class="justify">
+    The project also reveals realistic deployment considerations. For example, Firebase configuration, Firestore rules, Storage setup,
+    and platform-specific permissions such as macOS network entitlements are essential for real-world mobile engineering. This makes the
+    project especially valuable as a lab exercise because it captures both coding and operational aspects of software development.
+  </p>
+</div>
+
+<div class="page">
+  <div class="chapter-title">Chapter 4<br>Engineering Standards and Mapping</div>
+  <p class="justify">
+    This chapter evaluates the project from broader engineering perspectives including social impact, sustainability, ethics,
+    project management, program outcome mapping, complex problem characteristics, and engineering activity classifications.
+  </p>
+
+  <h2>Impact on Society, Environment and Sustainability</h2>
+
+  <h3>Impact on Life</h3>
+  <p class="justify">
+    Quiz Master improves academic life by making classroom assessment more organized and accessible. Students receive immediate feedback,
+    topic-focused practice, and a clearer understanding of their strengths and weaknesses. Administrators or teachers save time by using
+    a centralized platform instead of manually handling separate quiz tools, spreadsheets, and paper records.
+  </p>
+
+  <h3>Impact on Society &amp; Environment</h3>
+  <p class="justify">
+    The project supports digital transformation in education by reducing dependence on paper-based quizzes and result processing. In a
+    broader social sense, it encourages technology adoption in assessment workflows and contributes to smarter educational management.
+    Using a cross-platform mobile stack also increases reach because the same system can support multiple device types. Environmentally,
+    digital quiz delivery can reduce paper consumption, printing cost, and repeated administrative handling.
+  </p>
+
+  <h3>Ethical Aspects</h3>
+  <p class="justify">
+    Ethical considerations include protecting user identity, restricting unauthorized access, and preventing unfair administrative actions.
+    The project addresses these through authenticated access, role separation, and backend rule design. Profile pictures and personal details
+    are user-owned information, so access is constrained by account identity. Ethical development also requires transparency, so the system
+    clearly distinguishes practice mode from exam mode and visibly communicates quiz conditions such as attempt limits and answer review policy.
+  </p>
+
+  <h3>Sustainability Plan</h3>
+  <p class="justify">
+    The system is designed for long-term maintainability. Flutter enables a single codebase, reducing maintenance duplication. Firebase reduces
+    server-management burden for small academic deployments. The repository abstraction allows future replacement or expansion of backend services.
+    Additional sustainability measures for future versions include analytics logging, teacher feedback export, stronger storage configuration,
+    and institutional deployment procedures.
+  </p>
+
+  <h2>Project Management and Team Work</h2>
+  <p class="justify">
+    This version of the project was prepared as a single-student implementation, so planning, coding, testing, debugging, and documentation were
+    coordinated within one workflow. The project still follows structured engineering stages: requirement identification, architecture planning,
+    iterative implementation, validation, and reporting. Even in an individual setting, these activities reflect core team-work values such as
+    accountability, integration discipline, and milestone-based progress.
+  </p>
+
+  <h3>Budget and Revenue Model</h3>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Primary Budget (BDT)</th>
+      <th>Alternate Budget (BDT)</th>
+      <th>Rationale</th>
+    </tr>
+    <tr>
+      <td>Development Laptop / Workstation</td>
+      <td>0</td>
+      <td>60,000</td>
+      <td>Primary assumes existing personal machine; alternate assumes new budget laptop purchase.</td>
+    </tr>
+    <tr>
+      <td>Internet Connectivity</td>
+      <td>1,500</td>
+      <td>3,000</td>
+      <td>Needed for dependency download, Firebase console setup, and backend testing.</td>
+    </tr>
+    <tr>
+      <td>Firebase Services</td>
+      <td>0</td>
+      <td>5,000</td>
+      <td>Primary assumes Spark/free-tier academic use; alternate reserves cost for higher usage or storage growth.</td>
+    </tr>
+    <tr>
+      <td>Testing Devices</td>
+      <td>0</td>
+      <td>15,000</td>
+      <td>Primary assumes existing device/emulator access; alternate covers a low-cost physical Android test device.</td>
+    </tr>
+    <tr>
+      <td>Documentation and Miscellaneous</td>
+      <td>500</td>
+      <td>1,500</td>
+      <td>Printing, formatting, and project submission preparation.</td>
+    </tr>
+    <tr>
+      <th>Total</th>
+      <th>2,000</th>
+      <th>84,500</th>
+      <th>Primary is low-cost student development; alternate reflects a more formal deployment-ready setup.</th>
+    </tr>
+  </table>
+  <p class="justify">
+    A suitable revenue model for future commercialization would be an institutional subscription model where schools, coaching centers, or departments
+    pay per semester or per active batch. A freemium model could also be used, where small classes use a free version while analytics export, advanced
+    reporting, and multi-admin workflows remain premium features.
+  </p>
+
+  <h2>Complex Engineering Problem</h2>
+  <p class="justify">
+    Although Quiz Master is a student lab project, it still represents a complex engineering problem because it combines user management, cloud services,
+    data synchronization, UI design, role-based constraints, and assessment logic in one integrated solution. The developer must balance usability,
+    security, correctness, scalability, and platform compatibility at the same time.
+  </p>
+
+  <h2>Mapping of Program Outcome</h2>
+  <p><strong>Table 4.1: Justification of Program Outcomes</strong></p>
+  <table>
+    <tr>
+      <th>PO's</th>
+      <th>Justification</th>
+    </tr>
+    <tr>
+      <td>PO1</td>
+      <td>The project applies core computing and engineering knowledge through Flutter application development, Firebase integration, data modeling, and interface construction.</td>
+    </tr>
+    <tr>
+      <td>PO2</td>
+      <td>The problem was analyzed in terms of user roles, exam policies, state synchronization, and data consistency, which required structured reasoning and technical decision-making.</td>
+    </tr>
+    <tr>
+      <td>PO3</td>
+      <td>The final solution was designed as a practical mobile software product that satisfies real educational needs while maintaining usability, modularity, and deployability.</td>
+    </tr>
+  </table>
+
+  <h2>Complex Problem Solving</h2>
+  <p><strong>Table 4.2: Mapping with complex problem solving</strong></p>
+  <table>
+    <tr>
+      <th>EP</th>
+      <th>Mapping</th>
+      <th>Rationale</th>
+    </tr>
+    <tr>
+      <td>EP1</td>
+      <td>Depth of Knowledge</td>
+      <td>Requires knowledge of mobile UI, authentication, cloud databases, storage, testing, and data-driven analytics.</td>
+    </tr>
+    <tr>
+      <td>EP2</td>
+      <td>Range of Conflicting Requirements</td>
+      <td>The system must balance simplicity for students, control for admins, security for data, and responsiveness for mobile devices.</td>
+    </tr>
+    <tr>
+      <td>EP3</td>
+      <td>Depth of Analysis</td>
+      <td>Designing attempt limits, timer behavior, progress analysis, and role-based rules required non-trivial logical analysis.</td>
+    </tr>
+    <tr>
+      <td>EP4</td>
+      <td>Familiarity of Issues</td>
+      <td>Quiz management is familiar, but combining it with real-time Firebase flows, profile media, and multi-role UX adds complexity.</td>
+    </tr>
+    <tr>
+      <td>EP5</td>
+      <td>Extent of Applicable Codes</td>
+      <td>The project is constrained by Flutter framework conventions, Firebase rules, platform permissions, and software engineering best practices.</td>
+    </tr>
+    <tr>
+      <td>EP6</td>
+      <td>Extent of Stakeholder Involvement</td>
+      <td>Students, teachers/admins, and the institution all have different needs that influence the solution design.</td>
+    </tr>
+    <tr>
+      <td>EP7</td>
+      <td>Inter-dependence</td>
+      <td>Authentication, profile data, question bank, settings, attempts, analytics, and UI behavior are all strongly inter-dependent.</td>
+    </tr>
+  </table>
+
+  <h3>Knowledge Profile and Rationale</h3>
+  <p class="justify">
+    The project depends on software design knowledge, mobile application development, cloud backend integration, and algorithmic reasoning. A change in
+    one module, such as user profile structure, directly affects UI rendering, repository logic, backend rules, and test behavior. This interdependence is
+    a defining feature of complex problem solving.
+  </p>
+
+  <h2>Engineering Activities</h2>
+  <p><strong>Table 4.3: Mapping with complex engineering activities</strong></p>
+  <table>
+    <tr>
+      <th>EA</th>
+      <th>Mapping</th>
+      <th>Rationale</th>
+    </tr>
+    <tr>
+      <td>EA1</td>
+      <td>Range of Resources</td>
+      <td>The project uses Flutter SDK, Firebase services, device/emulator tools, test tools, and structured project documentation.</td>
+    </tr>
+    <tr>
+      <td>EA2</td>
+      <td>Level of Interaction</td>
+      <td>Interaction occurs between user roles, UI components, asynchronous data flows, and cloud services.</td>
+    </tr>
+    <tr>
+      <td>EA3</td>
+      <td>Innovation</td>
+      <td>The system combines an educational quiz workflow with AI-style feedback, mobile-first design, and cloud-backed profile media support.</td>
+    </tr>
+    <tr>
+      <td>EA4</td>
+      <td>Consequences for Society and Environment</td>
+      <td>It supports digital education, reduces paper use, and improves assessment efficiency for academic environments.</td>
+    </tr>
+    <tr>
+      <td>EA5</td>
+      <td>Familiarity</td>
+      <td>While quizzes are familiar, the engineering implementation across mobile UI, Firebase security, analytics, and deployment is only moderately familiar and requires structured practice.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="page">
+  <div class="chapter-title">Chapter 5<br>Conclusion</div>
+  <p class="justify">
+    This chapter concludes the report by summarizing the major achievements of the project, acknowledging current limitations,
+    and highlighting future work that can increase the value and readiness of the system.
+  </p>
+
+  <h2>Summary</h2>
+  <p class="justify">
+    Quiz Master is a complete mini lab project that demonstrates the design and development of a role-based mobile quiz platform using Flutter and Firebase.
+    The project includes secure login and signup, admin-controlled settings, question bank management, exam and practice modes, result analytics, leaderboard
+    support, progress visualization, and profile picture functionality. The current codebase reflects modern mobile engineering practices and is validated through
+    successful static analysis and automated tests.
+  </p>
+
+  <h2>Limitation</h2>
+  <p class="justify">
+    The project still has some limitations. It does not yet include advanced institutional features such as class-wise grouping, question import from files,
+    PDF report export, push notifications, or teacher-side analytics dashboards beyond the existing leaderboard and progress views. The performance analysis is
+    largely qualitative and code-based rather than benchmark-based. In addition, live profile image upload requires a properly configured Firebase Storage bucket
+    during deployment.
+  </p>
+
+  <h2>Future Work</h2>
+  <ul>
+    <li>Add teacher-side reporting export in PDF or spreadsheet format.</li>
+    <li>Support batch, semester, course, and section-based grouping.</li>
+    <li>Add question categories such as image-based MCQ, short answer, or descriptive evaluation.</li>
+    <li>Implement stronger analytics, notification, and scheduling features.</li>
+    <li>Expand Firebase Storage usage for richer profile customization and question media attachments.</li>
+    <li>Introduce performance benchmarking and usage analytics for real deployment evaluation.</li>
+  </ul>
+
+  <h2>References</h2>
+  <p>[1] Flutter Documentation, "Flutter documentation," Google. Available: https://docs.flutter.dev/</p>
+  <p>[2] Firebase Documentation, "Firebase for app development," Google. Available: https://firebase.google.com/docs</p>
+  <p>[3] Material Design, "Material 3 design system," Google. Available: https://m3.material.io/</p>
+  <p>[4] Ian Sommerville, <em>Software Engineering</em>, 10th ed., Pearson, 2015.</p>
+  <p>[5] Jon Kleinberg and Eva Tardos, <em>Algorithm Design</em>, Pearson Education India, 2006.</p>
+</div>
 
 </body>
 </html>
