@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum AttemptMode { exam, practice }
 
 class AiAnalysis {
@@ -120,7 +122,7 @@ class ExamAttempt {
       'examVersion': examVersion,
       'score': score,
       'totalQuestions': totalQuestions,
-      'completedAt': completedAt.toIso8601String(),
+      'completedAt': Timestamp.fromDate(completedAt),
       'subjectCorrect': subjectCorrect,
       'subjectTotal': subjectTotal,
       'analysis': analysis.toJson(),
@@ -133,6 +135,14 @@ class ExamAttempt {
       (mode) => mode.name == json['mode'],
       orElse: () => AttemptMode.exam,
     );
+    final rawCompletedAt = json['completedAt'];
+    final completedAt = switch (rawCompletedAt) {
+      Timestamp timestamp => timestamp.toDate(),
+      DateTime dateTime => dateTime,
+      int milliseconds => DateTime.fromMillisecondsSinceEpoch(milliseconds),
+      String value => DateTime.tryParse(value) ?? DateTime.now(),
+      _ => DateTime.now(),
+    };
 
     return ExamAttempt(
       id: json['id'] as String,
@@ -140,16 +150,15 @@ class ExamAttempt {
       userName: json['userName'] as String,
       mode: mode,
       examVersion:
-          json['examVersion'] as int? ?? (mode == AttemptMode.exam ? 1 : 0),
-      score: json['score'] as int,
-      totalQuestions: json['totalQuestions'] as int,
-      completedAt:
-          DateTime.tryParse(json['completedAt'] as String? ?? '') ??
-          DateTime.now(),
+          (json['examVersion'] as num?)?.toInt() ??
+          (mode == AttemptMode.exam ? 1 : 0),
+      score: (json['score'] as num?)?.toInt() ?? 0,
+      totalQuestions: (json['totalQuestions'] as num?)?.toInt() ?? 0,
+      completedAt: completedAt,
       subjectCorrect: (json['subjectCorrect'] as Map<String, dynamic>? ?? {})
-          .map((key, value) => MapEntry(key, value as int)),
+          .map((key, value) => MapEntry(key, (value as num).toInt())),
       subjectTotal: (json['subjectTotal'] as Map<String, dynamic>? ?? {}).map(
-        (key, value) => MapEntry(key, value as int),
+        (key, value) => MapEntry(key, (value as num).toInt()),
       ),
       analysis: AiAnalysis.fromJson(
         json['analysis'] as Map<String, dynamic>? ?? const {},

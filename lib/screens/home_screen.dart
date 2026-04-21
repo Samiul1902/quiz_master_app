@@ -3,6 +3,7 @@ import 'package:quiz_master_app/controllers/app_controller.dart';
 import 'package:quiz_master_app/models/exam_attempt.dart';
 import 'package:quiz_master_app/screens/profile_screen.dart';
 import 'package:quiz_master_app/screens/quiz_screen.dart';
+import 'package:quiz_master_app/widgets/user_avatar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.controller});
@@ -126,7 +127,11 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
             onPressed: () => _openProfile(context),
-            icon: const Icon(Icons.person_outline_rounded),
+            icon: UserAvatar(
+              name: user.name,
+              photoUrl: user.photoUrl,
+              radius: 16,
+            ),
             tooltip: 'Profile',
           ),
           TextButton.icon(
@@ -136,271 +141,280 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Welcome, ${user.name}',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF4F6F9), Color(0xFFE8EAF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Welcome, ${user.name}',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Take the admin-controlled exam, practice by topic, and review AI-style performance analysis after each attempt.',
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
-                        _QuickStat(
-                          label: 'Exam Title',
-                          value: settings.examTitle,
-                        ),
-                        _QuickStat(
-                          label: 'Questions',
-                          value: '${settings.questionCount}',
-                        ),
-                        _QuickStat(
-                          label: 'Exam Duration',
-                          value: '${settings.examDurationMinutes} min',
-                        ),
-                        _QuickStat(
-                          label: 'Attempts Left',
-                          value: remainingExamAttempts < 0
-                              ? 'Unlimited'
-                              : '$remainingExamAttempts',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      remainingExamAttempts < 0
-                          ? 'Current exam cycle attempts used: $examAttemptsMade'
-                          : 'Current exam cycle attempts used: $examAttemptsMade / ${settings.maxExamAttemptsPerStudent}',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 18),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        final vertical = constraints.maxWidth < 520;
+                      const SizedBox(height: 10),
+                      Text(
+                        'Take the admin-controlled exam, practice by topic, and review AI-style performance analysis after each attempt.',
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          _QuickStat(
+                            label: 'Exam Title',
+                            value: settings.examTitle,
+                          ),
+                          _QuickStat(
+                            label: 'Questions',
+                            value: '${settings.questionCount}',
+                          ),
+                          _QuickStat(
+                            label: 'Exam Duration',
+                            value: '${settings.examDurationMinutes} min',
+                          ),
+                          _QuickStat(
+                            label: 'Attempts Left',
+                            value: remainingExamAttempts < 0
+                                ? 'Unlimited'
+                                : '$remainingExamAttempts',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        remainingExamAttempts < 0
+                            ? 'Current exam cycle attempts used: $examAttemptsMade'
+                            : 'Current exam cycle attempts used: $examAttemptsMade / ${settings.maxExamAttemptsPerStudent}',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 18),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final vertical = constraints.maxWidth < 520;
 
-                        if (vertical) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                          if (vertical) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                FilledButton.icon(
+                                  onPressed: examButtonEnabled
+                                      ? () => _openExam(context, false)
+                                      : null,
+                                  icon: const Icon(Icons.play_arrow_rounded),
+                                  label: const Text('Start Exam'),
+                                ),
+                                const SizedBox(height: 12),
+                                OutlinedButton.icon(
+                                  onPressed: practiceButtonEnabled
+                                      ? () => _openExam(context, true)
+                                      : null,
+                                  icon: const Icon(Icons.school_rounded),
+                                  label: const Text('Practice & Prepare'),
+                                ),
+                              ],
+                            );
+                          }
+
+                          return Row(
                             children: [
-                              FilledButton.icon(
-                                onPressed: examButtonEnabled
-                                    ? () => _openExam(context, false)
-                                    : null,
-                                icon: const Icon(Icons.play_arrow_rounded),
-                                label: const Text('Start Exam'),
+                              Expanded(
+                                child: FilledButton.icon(
+                                  onPressed: examButtonEnabled
+                                      ? () => _openExam(context, false)
+                                      : null,
+                                  icon: const Icon(Icons.play_arrow_rounded),
+                                  label: const Text('Start Exam'),
+                                ),
                               ),
-                              const SizedBox(height: 12),
-                              OutlinedButton.icon(
-                                onPressed: practiceButtonEnabled
-                                    ? () => _openExam(context, true)
-                                    : null,
-                                icon: const Icon(Icons.school_rounded),
-                                label: const Text('Practice & Prepare'),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: practiceButtonEnabled
+                                      ? () => _openExam(context, true)
+                                      : null,
+                                  icon: const Icon(Icons.school_rounded),
+                                  label: const Text('Practice & Prepare'),
+                                ),
                               ),
                             ],
                           );
-                        }
-
-                        return Row(
-                          children: [
-                            Expanded(
-                              child: FilledButton.icon(
-                                onPressed: examButtonEnabled
-                                    ? () => _openExam(context, false)
-                                    : null,
-                                icon: const Icon(Icons.play_arrow_rounded),
-                                label: const Text('Start Exam'),
+                        },
+                      ),
+                      if (!examButtonEnabled) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          'Exam access is locked because you have used all allowed exam attempts.',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'Practice by Topic',
+                subtitle:
+                    'Select the subjects you want to include when you start practice.',
+                child: subjects.isEmpty
+                    ? const Text('No practice topics are available right now.')
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              ActionChip(
+                                avatar: const Icon(Icons.done_all_rounded),
+                                label: const Text('All Topics'),
+                                onPressed: () => _selectAllTopics(subjects),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: practiceButtonEnabled
-                                    ? () => _openExam(context, true)
-                                    : null,
-                                icon: const Icon(Icons.school_rounded),
-                                label: const Text('Practice & Prepare'),
+                              ActionChip(
+                                avatar: const Icon(Icons.clear_all_rounded),
+                                label: const Text('Clear'),
+                                onPressed: _clearTopics,
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    if (!examButtonEnabled) ...[
-                      const SizedBox(height: 12),
+                              ...subjects.map(
+                                (subject) => FilterChip(
+                                  selected: _selectedPracticeSubjects.contains(
+                                    subject,
+                                  ),
+                                  label: Text(subject),
+                                  onSelected: (_) => _toggleSubject(subject),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          LinearProgressIndicator(
+                            value: subjects.isEmpty
+                                ? 0
+                                : selectedSubjects.length / subjects.length,
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              _QuickStat(
+                                label: 'Selected Topics',
+                                value: '${selectedSubjects.length}',
+                              ),
+                              _QuickStat(
+                                label: 'Practice Questions',
+                                value: '$practiceQuestionCount',
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            !settings.practiceEnabled
+                                ? 'Practice mode is currently turned off by the admin.'
+                                : selectedSubjects.isEmpty
+                                ? 'Select at least one topic to enable practice.'
+                                : 'The Practice & Prepare button will now use ${selectedSubjects.length} selected topic${selectedSubjects.length == 1 ? '' : 's'}.',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+              ),
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'Progress Visualization',
+                subtitle:
+                    'See your readiness score and topic-by-topic learning progress.',
+                child: progressSummary == null
+                    ? const Text(
+                        'Complete a practice or exam session to unlock your progress charts.',
+                      )
+                    : _ProgressVisualization(summary: progressSummary),
+              ),
+              if (latestAttempt != null) const SizedBox(height: 20),
+              if (latestAttempt != null)
+                _SectionCard(
+                  title: 'AI Analyzer',
+                  subtitle:
+                      'Smart feedback based on your most recent exam or practice session.',
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Text(
-                        'Exam access is locked because you have used all allowed exam attempts.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
+                        latestAttempt.analysis.headline,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        latestAttempt.analysis.summary,
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 12),
+                      ...latestAttempt.analysis.recommendations.map(
+                        (item) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Icon(Icons.auto_awesome_rounded, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(child: Text(item)),
+                            ],
+                          ),
                         ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Practice by Topic',
-              subtitle:
-                  'Select the subjects you want to include when you start practice.',
-              child: subjects.isEmpty
-                  ? const Text('No practice topics are available right now.')
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            ActionChip(
-                              avatar: const Icon(Icons.done_all_rounded),
-                              label: const Text('All Topics'),
-                              onPressed: () => _selectAllTopics(subjects),
-                            ),
-                            ActionChip(
-                              avatar: const Icon(Icons.clear_all_rounded),
-                              label: const Text('Clear'),
-                              onPressed: _clearTopics,
-                            ),
-                            ...subjects.map(
-                              (subject) => FilterChip(
-                                selected: _selectedPracticeSubjects.contains(
-                                  subject,
-                                ),
-                                label: Text(subject),
-                                onSelected: (_) => _toggleSubject(subject),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        LinearProgressIndicator(
-                          value: subjects.isEmpty
-                              ? 0
-                              : selectedSubjects.length / subjects.length,
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
-                          children: [
-                            _QuickStat(
-                              label: 'Selected Topics',
-                              value: '${selectedSubjects.length}',
-                            ),
-                            _QuickStat(
-                              label: 'Practice Questions',
-                              value: '$practiceQuestionCount',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          !settings.practiceEnabled
-                              ? 'Practice mode is currently turned off by the admin.'
-                              : selectedSubjects.isEmpty
-                              ? 'Select at least one topic to enable practice.'
-                              : 'The Practice & Prepare button will now use ${selectedSubjects.length} selected topic${selectedSubjects.length == 1 ? '' : 's'}.',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Progress Visualization',
-              subtitle:
-                  'See your readiness score and topic-by-topic learning progress.',
-              child: progressSummary == null
-                  ? const Text(
-                      'Complete a practice or exam session to unlock your progress charts.',
-                    )
-                  : _ProgressVisualization(summary: progressSummary),
-            ),
-            if (latestAttempt != null) const SizedBox(height: 20),
-            if (latestAttempt != null)
+              const SizedBox(height: 20),
               _SectionCard(
-                title: 'AI Analyzer',
+                title: 'Leaderboard',
                 subtitle:
-                    'Smart feedback based on your most recent exam or practice session.',
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      latestAttempt.analysis.headline,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    'See how students are performing in the admin-controlled exams.',
+                child: leaderboard.isEmpty
+                    ? const Text('No leaderboard data yet.')
+                    : Column(
+                        children: leaderboard
+                            .map((attempt) => _AttemptTile(attempt: attempt))
+                            .toList(),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      latestAttempt.analysis.summary,
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    ...latestAttempt.analysis.recommendations.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.auto_awesome_rounded, size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(item)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Leaderboard',
-              subtitle:
-                  'See how students are performing in the admin-controlled exams.',
-              child: leaderboard.isEmpty
-                  ? const Text('No leaderboard data yet.')
-                  : Column(
-                      children: leaderboard
-                          .map((attempt) => _AttemptTile(attempt: attempt))
-                          .toList(),
-                    ),
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'My Progress',
-              subtitle:
-                  'Track your exam and practice history to prepare better.',
-              child: recentHistory.isEmpty
-                  ? const Text(
-                      'No attempts yet. Start an exam or a practice session.',
-                    )
-                  : Column(
-                      children: recentHistory
-                          .map((attempt) => _AttemptTile(attempt: attempt))
-                          .toList(),
-                    ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'My Progress',
+                subtitle:
+                    'Track your exam and practice history to prepare better.',
+                child: recentHistory.isEmpty
+                    ? const Text(
+                        'No attempts yet. Start an exam or a practice session.',
+                      )
+                    : Column(
+                        children: recentHistory
+                            .map((attempt) => _AttemptTile(attempt: attempt))
+                            .toList(),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

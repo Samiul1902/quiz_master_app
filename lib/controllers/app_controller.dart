@@ -1,124 +1,188 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:quiz_master_app/data/question_data.dart';
 import 'package:quiz_master_app/models/exam_attempt.dart';
 import 'package:quiz_master_app/models/exam_settings.dart';
 import 'package:quiz_master_app/models/question_model.dart';
 import 'package:quiz_master_app/models/user_model.dart';
-import 'package:quiz_master_app/services/local_storage_service.dart';
+import 'package:quiz_master_app/services/app_repository.dart';
 
 class AppController extends ChangeNotifier {
-  AppController(this._storageService);
+  AppController(this._repository);
 
-  final LocalStorageService _storageService;
+  final AppRepository _repository;
   static final RegExp _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
   bool isLoading = true;
+  String? loadError;
   UserModel? currentUser;
   List<UserModel> users = [];
   List<QuestionModel> questions = [];
   List<ExamAttempt> attempts = [];
   ExamSettings settings = ExamSettings.initial();
 
-  Future<void> load() async {
+  String? _sessionUserId;
+  bool _receivedUsers = false;
+  bool _receivedQuestions = false;
+  bool _receivedAttempts = false;
+  bool _receivedSettings = false;
+
+  Future<void>? _loadFuture;
+  Completer<void>? _initialLoadCompleter;
+  Completer<void>? _pendingAuthSyncCompleter;
+
+  StreamSubscription<String?>? _sessionSubscription;
+  StreamSubscription<List<UserModel>>? _usersSubscription;
+  StreamSubscription<List<QuestionModel>>? _questionsSubscription;
+  StreamSubscription<List<ExamAttempt>>? _attemptsSubscription;
+  StreamSubscription<ExamSettings>? _settingsSubscription;
+
+  Future<void> load() {
+    return _loadFuture ??= _loadInternal();
+  }
+
+  Future<void> reload() async {
+    await _cancelSubscriptions();
+    _resetStreamState();
+    _loadFuture = null;
+    await load();
+  }
+
+  Future<void> _loadInternal() async {
     isLoading = true;
+    loadError = null;
+    _initialLoadCompleter = Completer<void>();
     notifyListeners();
 
-    final state = await _storageService.loadState();
+    try {
+      await _repository.initialize();
+      _bindSessionStream();
+      await _initialLoadCompleter!.future;
+    } catch (error, stackTrace) {
+      debugPrint('Failed to load Firebase-backed app state: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      loadError =
+          'Unable to connect to Firebase. Check your Firebase setup and try again.';
+      isLoading = false;
+      _loadFuture = null;
+      notifyListeners();
+    }
+  }
 
-    if (state == null) {
-      _seedDefaults();
-      await _save();
-    } else {
-      users = (state['users'] as List<dynamic>? ?? [])
-          .map((item) => UserModel.fromJson(item as Map<String, dynamic>))
-          .toList();
-      questions = (state['questions'] as List<dynamic>? ?? [])
-          .map((item) => QuestionModel.fromJson(item as Map<String, dynamic>))
-          .toList();
-      attempts = (state['attempts'] as List<dynamic>? ?? [])
-          .map((item) => ExamAttempt.fromJson(item as Map<String, dynamic>))
-          .toList();
-      settings = ExamSettings.fromJson(
-        state['settings'] as Map<String, dynamic>? ?? const {},
-      );
+  void _bindSessionStream() {
+    _sessionSubscription = _repository.watchSessionUserId().listen((userId) {
+      unawaited(_handleSessionChanged(userId));
+    }, onError: _handleStreamError);
+  }
 
-      final currentUserId = state['currentUserId'] as String?;
-      currentUser = _findUserById(currentUserId);
+  Future<void> _handleSessionChanged(String? userId) async {
+    _sessionUserId = userId;
 
-      if (users.isEmpty || questions.isEmpty) {
-        _seedDefaults();
-        await _save();
+    if (userId == null) {
+      await _cancelDataSubscriptions();
+      _resetDataState();
+      currentUser = null;
+      isLoading = false;
+      loadError = null;
+      if (_initialLoadCompleter?.isCompleted == false) {
+        _initialLoadCompleter?.complete();
       }
+      _resolvePendingAuthSync();
+      notifyListeners();
+      return;
     }
 
+    await _cancelDataSubscriptions();
+    _resetDataSnapshotState();
+    isLoading = true;
+    loadError = null;
+    notifyListeners();
+    _bindDataStreams();
+  }
+
+  void _bindDataStreams() {
+    _usersSubscription = _repository.watchUsers().listen((items) {
+      users = items;
+      _receivedUsers = true;
+      _syncCurrentUser();
+      _handleInitialSnapshot();
+      notifyListeners();
+    }, onError: _handleStreamError);
+
+    _questionsSubscription = _repository.watchQuestions().listen((items) {
+      questions = items;
+      _receivedQuestions = true;
+      _handleInitialSnapshot();
+      notifyListeners();
+    }, onError: _handleStreamError);
+
+    _attemptsSubscription = _repository.watchAttempts().listen((items) {
+      attempts = items;
+      _receivedAttempts = true;
+      _handleInitialSnapshot();
+      notifyListeners();
+    }, onError: _handleStreamError);
+
+    _settingsSubscription = _repository.watchSettings().listen((value) {
+      settings = value;
+      _receivedSettings = true;
+      _handleInitialSnapshot();
+      notifyListeners();
+    }, onError: _handleStreamError);
+  }
+
+  void _handleStreamError(Object error, StackTrace stackTrace) {
+    debugPrint('A Firebase stream failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+    loadError = 'A live Firebase update failed. Please try again in a moment.';
     isLoading = false;
+    _resolvePendingAuthSync();
     notifyListeners();
   }
 
-  void _seedDefaults() {
-    users = const [
-      UserModel(
-        id: 'admin-1',
-        name: 'System Admin',
-        email: 'admin@quizmaster.com',
-        password: 'admin123',
-        role: UserRole.admin,
-        phone: '+8801000000000',
-        organization: 'Quiz Master Academy',
-        department: 'Administration',
-        bio:
-            'Platform administrator for exams, question bank, and student progress.',
-      ),
-      UserModel(
-        id: 'student-1',
-        name: 'Demo Student',
-        email: 'student@quizmaster.com',
-        password: 'student123',
-        role: UserRole.student,
-        phone: '+8801999999999',
-        organization: 'Quiz Master Academy',
-        department: 'Science',
-        bio: 'Demo student account for practice sessions and exams.',
-      ),
-    ];
-    questions = List<QuestionModel>.from(defaultQuestions);
-    attempts = [];
-    settings = ExamSettings.initial();
-    currentUser = null;
+  void _handleInitialSnapshot() {
+    if (!_receivedUsers ||
+        !_receivedQuestions ||
+        !_receivedAttempts ||
+        !_receivedSettings) {
+      return;
+    }
+
+    // When Firebase Auth signs in before the matching Firestore profile
+    // document is observed, wait for the user record too. Otherwise signup
+    // can report a false failure even though the account creation succeeded.
+    if (_sessionUserId != null && currentUser == null) {
+      return;
+    }
+
+    if (isLoading) {
+      isLoading = false;
+    }
+
+    if (_initialLoadCompleter?.isCompleted == false) {
+      _initialLoadCompleter?.complete();
+    }
+    _resolvePendingAuthSync();
   }
 
-  Future<void> _save() async {
-    await _storageService.saveState({
-      'currentUserId': currentUser?.id,
-      'users': users.map((user) => user.toJson()).toList(),
-      'questions': questions.map((question) => question.toJson()).toList(),
-      'attempts': attempts.map((attempt) => attempt.toJson()).toList(),
-      'settings': settings.toJson(),
-    });
+  void _syncCurrentUser() {
+    currentUser = _findUserById(_sessionUserId);
   }
 
   Future<String?> login({
     required String email,
     required String password,
   }) async {
-    final normalizedEmail = _normalizeEmail(email);
-
-    if (normalizedEmail.isEmpty || password.isEmpty) {
-      return 'Enter your email and password.';
+    final error = await _repository.login(email: email, password: password);
+    if (error != null) {
+      return error;
     }
 
-    final user = _findUserByEmail(normalizedEmail);
-
-    if (user == null || user.password != password) {
-      return 'Invalid email or password.';
-    }
-
-    currentUser = user;
-    notifyListeners();
-    await _save();
-    return null;
+    await _waitForAuthSync();
+    return currentUser == null
+        ? loadError ?? 'Unable to sign in right now.'
+        : null;
   }
 
   Future<String?> signup({
@@ -146,34 +210,24 @@ class AppController extends ChangeNotifier {
       return 'Password must be at least 6 characters.';
     }
 
-    final alreadyExists = users.any(
-      (user) => _normalizeEmail(user.email) == normalizedEmail,
-    );
-
-    if (alreadyExists) {
-      return 'An account with this email already exists.';
-    }
-
-    final newUser = UserModel(
-      id: '${role.name}-${DateTime.now().millisecondsSinceEpoch}',
+    final error = await _repository.signup(
       name: normalizedName,
       email: normalizedEmail,
       password: password,
       role: role,
-      organization: role == UserRole.admin ? 'Quiz Master Organization' : '',
     );
+    if (error != null) {
+      return error;
+    }
 
-    users = [...users, newUser];
-    currentUser = newUser;
-    notifyListeners();
-    await _save();
-    return null;
+    await _waitForAuthSync();
+    return currentUser == null
+        ? loadError ?? 'Unable to create the account right now.'
+        : null;
   }
 
   Future<void> logout() async {
-    currentUser = null;
-    notifyListeners();
-    await _save();
+    await _repository.logout();
   }
 
   Future<String?> updateCurrentUserProfile({
@@ -182,6 +236,9 @@ class AppController extends ChangeNotifier {
     required String organization,
     required String department,
     required String bio,
+    Uint8List? profileImageBytes,
+    String? profileImageContentType,
+    bool removeProfileImage = false,
   }) async {
     final user = currentUser;
     if (user == null) {
@@ -193,42 +250,33 @@ class AppController extends ChangeNotifier {
       return 'Name must be at least 3 characters.';
     }
 
-    final updatedUser = user.copyWith(
-      name: normalizedName,
-      phone: phone.trim(),
-      organization: organization.trim(),
-      department: department.trim(),
-      bio: bio.trim(),
+    return _repository.updateUserProfile(
+      user.copyWith(
+        name: normalizedName,
+        phone: phone.trim(),
+        organization: organization.trim(),
+        department: department.trim(),
+        bio: bio.trim(),
+      ),
+      profileImageBytes: profileImageBytes,
+      profileImageContentType: profileImageContentType,
+      removeProfileImage: removeProfileImage,
     );
-
-    users = users
-        .map((item) => item.id == updatedUser.id ? updatedUser : item)
-        .toList();
-    currentUser = updatedUser;
-    notifyListeners();
-    await _save();
-    return null;
   }
 
   Future<void> updateSettings(ExamSettings newSettings) async {
     final nextExamVersion = _didSettingsChange(newSettings)
         ? settings.examVersion + 1
         : settings.examVersion;
+    final nextSettings = newSettings.copyWith(examVersion: nextExamVersion);
 
-    settings = newSettings.copyWith(examVersion: nextExamVersion);
+    settings = nextSettings;
     notifyListeners();
-    await _save();
+    await _repository.updateSettings(nextSettings);
   }
 
   Future<String?> addQuestion(QuestionModel question) async {
-    if (question.options.length != 4) {
-      return 'Each question must have exactly 4 options.';
-    }
-
-    questions = [...questions, question];
-    notifyListeners();
-    await _save();
-    return null;
+    return _repository.addQuestion(question);
   }
 
   Future<void> deleteQuestion(String questionId) async {
@@ -236,17 +284,11 @@ class AppController extends ChangeNotifier {
       return;
     }
 
-    questions = questions
-        .where((question) => question.id != questionId)
-        .toList();
-    notifyListeners();
-    await _save();
+    await _repository.deleteQuestion(questionId);
   }
 
   Future<void> addAttempt(ExamAttempt attempt) async {
-    attempts = [attempt, ...attempts];
-    notifyListeners();
-    await _save();
+    await _repository.addAttempt(attempt);
   }
 
   List<String> get availableSubjects {
@@ -409,20 +451,73 @@ class AppController extends ChangeNotifier {
     return null;
   }
 
-  UserModel? _findUserByEmail(String email) {
-    final normalizedEmail = _normalizeEmail(email);
-
-    for (final user in users) {
-      if (_normalizeEmail(user.email) == normalizedEmail) {
-        return user;
-      }
-    }
-
-    return null;
-  }
-
   String _normalizeEmail(String email) => email.trim().toLowerCase();
 
   String _normalizeName(String name) =>
       name.trim().replaceAll(RegExp(r'\s+'), ' ');
+
+  void _resetStreamState() {
+    _sessionUserId = null;
+    _resetDataSnapshotState();
+    currentUser = null;
+    loadError = null;
+    isLoading = true;
+  }
+
+  void _resetDataState() {
+    _resetDataSnapshotState();
+    users = [];
+    questions = [];
+    attempts = [];
+    settings = ExamSettings.initial();
+  }
+
+  void _resetDataSnapshotState() {
+    _receivedUsers = false;
+    _receivedQuestions = false;
+    _receivedAttempts = false;
+    _receivedSettings = false;
+  }
+
+  Future<void> _cancelDataSubscriptions() async {
+    await _usersSubscription?.cancel();
+    await _questionsSubscription?.cancel();
+    await _attemptsSubscription?.cancel();
+    await _settingsSubscription?.cancel();
+    _usersSubscription = null;
+    _questionsSubscription = null;
+    _attemptsSubscription = null;
+    _settingsSubscription = null;
+  }
+
+  Future<void> _cancelSubscriptions() async {
+    await _sessionSubscription?.cancel();
+    await _cancelDataSubscriptions();
+    _sessionSubscription = null;
+  }
+
+  Future<void> _waitForAuthSync() async {
+    if (currentUser != null && !isLoading) {
+      return;
+    }
+
+    _pendingAuthSyncCompleter ??= Completer<void>();
+    await _pendingAuthSyncCompleter!.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () {},
+    );
+  }
+
+  void _resolvePendingAuthSync() {
+    if (_pendingAuthSyncCompleter?.isCompleted == false) {
+      _pendingAuthSyncCompleter?.complete();
+    }
+    _pendingAuthSyncCompleter = null;
+  }
+
+  @override
+  void dispose() {
+    _cancelSubscriptions();
+    super.dispose();
+  }
 }

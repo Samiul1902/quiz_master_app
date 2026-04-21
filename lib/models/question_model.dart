@@ -49,10 +49,10 @@ class QuestionModel {
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
     return QuestionModel(
       id: json['id'] as String,
-      subject: json['subject'] as String,
-      question: json['question'] as String,
+      subject: json['subject'] as String? ?? '',
+      question: json['question'] as String? ?? '',
       options: (json['options'] as List<dynamic>).cast<String>(),
-      correctAnswerIndex: json['correctAnswerIndex'] as int,
+      correctAnswerIndex: (json['correctAnswerIndex'] as num?)?.toInt() ?? 0,
       explanation: json['explanation'] as String? ?? '',
     );
   }

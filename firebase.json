@@ -1,0 +1,47 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "quizmasterproject-d3e93",
+          "appId": "1:66826276753:android:86f9166ed9629012209430",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "quizmasterproject-d3e93",
+          "appId": "1:66826276753:ios:8883903a04b76e38209430",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "quizmasterproject-d3e93",
+          "appId": "1:66826276753:ios:8883903a04b76e38209430",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "quizmasterproject-d3e93",
+          "configurations": {
+            "android": "1:66826276753:android:86f9166ed9629012209430",
+            "ios": "1:66826276753:ios:8883903a04b76e38209430",
+            "macos": "1:66826276753:ios:8883903a04b76e38209430",
+            "web": "1:66826276753:web:c613b7aadb58636d209430",
+            "windows": "1:66826276753:web:adde0d4d8b6cb08e209430"
+          }
+        }
+      }
+    }
+  }
+}

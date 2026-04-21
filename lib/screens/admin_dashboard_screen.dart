@@ -4,6 +4,7 @@ import 'package:quiz_master_app/models/exam_settings.dart';
 import 'package:quiz_master_app/models/question_model.dart';
 import 'package:quiz_master_app/screens/profile_screen.dart';
 import 'package:quiz_master_app/widgets/progress_visualization.dart';
+import 'package:quiz_master_app/widgets/user_avatar.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key, required this.controller});
@@ -222,6 +223,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.controller;
+    final user = controller.currentUser!;
     final leaderboard = controller.leaderboard.take(8).toList();
     final students = controller.studentUsers;
     final adminCount = controller.users.where((user) => user.isAdmin).length;
@@ -235,7 +237,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         actions: [
           IconButton(
             onPressed: _openProfile,
-            icon: const Icon(Icons.person_outline_rounded),
+            icon: UserAvatar(
+              name: user.name,
+              photoUrl: user.photoUrl,
+              radius: 16,
+            ),
             tooltip: 'Profile',
           ),
           TextButton.icon(
@@ -245,219 +251,228 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                _SummaryCard(
-                  title: 'Students',
-                  value: '${students.length}',
-                  icon: Icons.school_rounded,
-                ),
-                _SummaryCard(
-                  title: 'Admins',
-                  value: '$adminCount',
-                  icon: Icons.admin_panel_settings_rounded,
-                ),
-                _SummaryCard(
-                  title: 'Questions',
-                  value: '${controller.questions.length}',
-                  icon: Icons.help_center_rounded,
-                ),
-                _SummaryCard(
-                  title: 'Exam Attempts',
-                  value: '${controller.totalClientAttempts}',
-                  icon: Icons.leaderboard_rounded,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Platform Progress Visualization',
-              subtitle:
-                  'See overall student performance and subject trends across the whole system.',
-              child: progressSummary == null
-                  ? const Text('No exam or practice attempts yet.')
-                  : ProgressVisualization(
-                      summary: progressSummary,
-                      primaryMetricLabel: 'Students',
-                      primaryMetricValue: '${students.length}',
-                      primaryMetricIcon: Icons.school_rounded,
-                    ),
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Exam Controls',
-              subtitle:
-                  'Admin can change question quantity, review visibility, attempt limit, and other important settings here. Saving any change starts a new exam cycle and resets current exam attempt counters.',
-              child: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF4F6F9), Color(0xFFE8EAF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
                 children: [
-                  TextField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Exam Title',
-                      border: OutlineInputBorder(),
-                    ),
+                  _SummaryCard(
+                    title: 'Students',
+                    value: '${students.length}',
+                    icon: Icons.school_rounded,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _countController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Question Quantity',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _timeController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: 'Exam Duration (Minutes)',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
+                  _SummaryCard(
+                    title: 'Admins',
+                    value: '$adminCount',
+                    icon: Icons.admin_panel_settings_rounded,
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _attemptLimitController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Max Exam Attempts Per Student',
-                      hintText: '0 means unlimited',
-                      border: OutlineInputBorder(),
-                    ),
+                  _SummaryCard(
+                    title: 'Questions',
+                    value: '${controller.questions.length}',
+                    icon: Icons.help_center_rounded,
                   ),
-                  const SizedBox(height: 12),
-                  SwitchListTile(
-                    value: _practiceEnabled,
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Allow Practice Mode'),
-                    onChanged: (value) {
-                      setState(() {
-                        _practiceEnabled = value;
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    value: _showExamReview,
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Show Exam Review To Students'),
-                    subtitle: const Text(
-                      'If enabled, students can see the review section before submit and detailed answer review after the exam.',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _showExamReview = value;
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    value: _showAnswersInPractice,
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Show Answers In Practice'),
-                    onChanged: (value) {
-                      setState(() {
-                        _showAnswersInPractice = value;
-                      });
-                    },
-                  ),
-                  SwitchListTile(
-                    value: _shuffleQuestions,
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Shuffle Questions'),
-                    onChanged: (value) {
-                      setState(() {
-                        _shuffleQuestions = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FilledButton(
-                      onPressed: _saveSettings,
-                      child: const Text('Save Settings'),
-                    ),
+                  _SummaryCard(
+                    title: 'Exam Attempts',
+                    value: '${controller.totalClientAttempts}',
+                    icon: Icons.leaderboard_rounded,
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Question Bank',
-              subtitle:
-                  'Add or remove questions. Students will receive exams based on this bank.',
-              action: FilledButton.icon(
-                onPressed: _showAddQuestionDialog,
-                icon: const Icon(Icons.add),
-                label: const Text('Add Question'),
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'Platform Progress Visualization',
+                subtitle:
+                    'See overall student performance and subject trends across the whole system.',
+                child: progressSummary == null
+                    ? const Text('No exam or practice attempts yet.')
+                    : ProgressVisualization(
+                        summary: progressSummary,
+                        primaryMetricLabel: 'Students',
+                        primaryMetricValue: '${students.length}',
+                        primaryMetricIcon: Icons.school_rounded,
+                      ),
               ),
-              child: Column(
-                children: controller.questions
-                    .map(
-                      (question) => Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          title: Text(question.question),
-                          subtitle: Text(
-                            '${question.subject} • Correct: ${question.correctAnswer}',
-                          ),
-                          trailing: IconButton(
-                            onPressed: () =>
-                                controller.deleteQuestion(question.id),
-                            icon: const Icon(Icons.delete_outline_rounded),
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'Exam Controls',
+                subtitle:
+                    'Admin can change question quantity, review visibility, attempt limit, and other important settings here. Saving any change starts a new exam cycle and resets current exam attempt counters.',
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'Exam Title',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _countController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Question Quantity',
+                              border: OutlineInputBorder(),
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            _SectionCard(
-              title: 'Student Progress & Leaderboard',
-              subtitle:
-                  'Admin can monitor how students are performing in the configured exam system.',
-              child: leaderboard.isEmpty
-                  ? const Text('No exam attempts yet.')
-                  : Column(
-                      children: leaderboard
-                          .map(
-                            (attempt) => Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  child: Text(
-                                    '${(attempt.accuracy * 100).round()}%',
-                                  ),
-                                ),
-                                title: Text(
-                                  '${attempt.userName} • ${attempt.scoreLabel}',
-                                ),
-                                subtitle: Text(
-                                  '${attempt.analysis.headline}\n${attempt.completedAt.toLocal()}',
-                                ),
-                                isThreeLine: true,
-                              ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _timeController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(
+                              labelText: 'Exam Duration (Minutes)',
+                              border: OutlineInputBorder(),
                             ),
-                          )
-                          .toList(),
+                          ),
+                        ),
+                      ],
                     ),
-            ),
-          ],
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _attemptLimitController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Max Exam Attempts Per Student',
+                        hintText: '0 means unlimited',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      value: _practiceEnabled,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Allow Practice Mode'),
+                      onChanged: (value) {
+                        setState(() {
+                          _practiceEnabled = value;
+                        });
+                      },
+                    ),
+                    SwitchListTile(
+                      value: _showExamReview,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Show Exam Review To Students'),
+                      subtitle: const Text(
+                        'If enabled, students can see the review section before submit and detailed answer review after the exam.',
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _showExamReview = value;
+                        });
+                      },
+                    ),
+                    SwitchListTile(
+                      value: _showAnswersInPractice,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Show Answers In Practice'),
+                      onChanged: (value) {
+                        setState(() {
+                          _showAnswersInPractice = value;
+                        });
+                      },
+                    ),
+                    SwitchListTile(
+                      value: _shuffleQuestions,
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Shuffle Questions'),
+                      onChanged: (value) {
+                        setState(() {
+                          _shuffleQuestions = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton(
+                        onPressed: _saveSettings,
+                        child: const Text('Save Settings'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'Question Bank',
+                subtitle:
+                    'Add or remove questions. Students will receive exams based on this bank.',
+                action: FilledButton.icon(
+                  onPressed: _showAddQuestionDialog,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Question'),
+                ),
+                child: Column(
+                  children: controller.questions
+                      .map(
+                        (question) => Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          child: ListTile(
+                            title: Text(question.question),
+                            subtitle: Text(
+                              '${question.subject} • Correct: ${question.correctAnswer}',
+                            ),
+                            trailing: IconButton(
+                              onPressed: () =>
+                                  controller.deleteQuestion(question.id),
+                              icon: const Icon(Icons.delete_outline_rounded),
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              _SectionCard(
+                title: 'Student Progress & Leaderboard',
+                subtitle:
+                    'Admin can monitor how students are performing in the configured exam system.',
+                child: leaderboard.isEmpty
+                    ? const Text('No exam attempts yet.')
+                    : Column(
+                        children: leaderboard
+                            .map(
+                              (attempt) => Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    child: Text(
+                                      '${(attempt.accuracy * 100).round()}%',
+                                    ),
+                                  ),
+                                  title: Text(
+                                    '${attempt.userName} • ${attempt.scoreLabel}',
+                                  ),
+                                  subtitle: Text(
+                                    '${attempt.analysis.headline}\n${attempt.completedAt.toLocal()}',
+                                  ),
+                                  isThreeLine: true,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -90,28 +90,6 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
-  void _fillDemoAdmin() {
-    setState(() {
-      _isLogin = true;
-      _errorText = null;
-      _selectedRole = UserRole.admin;
-      _nameController.clear();
-      _emailController.text = 'admin@quizmaster.com';
-      _passwordController.text = 'admin123';
-    });
-  }
-
-  void _fillDemoStudent() {
-    setState(() {
-      _isLogin = true;
-      _errorText = null;
-      _selectedRole = UserRole.student;
-      _nameController.clear();
-      _emailController.text = 'student@quizmaster.com';
-      _passwordController.text = 'student123';
-    });
-  }
-
   String? _validateName(String? value) {
     if (_isLogin) {
       return null;
@@ -351,20 +329,6 @@ class _AuthScreenState extends State<AuthScreen> {
                                     : Text(actionLabel),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            OutlinedButton.icon(
-                              onPressed: _fillDemoAdmin,
-                              icon: const Icon(
-                                Icons.admin_panel_settings_rounded,
-                              ),
-                              label: const Text('Use Demo Admin Account'),
-                            ),
-                            const SizedBox(height: 10),
-                            OutlinedButton.icon(
-                              onPressed: _fillDemoStudent,
-                              icon: const Icon(Icons.school_rounded),
-                              label: const Text('Use Demo Student Account'),
-                            ),
                             const SizedBox(height: 18),
                             Container(
                               padding: const EdgeInsets.all(16),
@@ -377,24 +341,23 @@ class _AuthScreenState extends State<AuthScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: const [
                                   Text(
-                                    'Demo Admin Account',
+                                    'First-Time Firebase Setup',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   SizedBox(height: 8),
-                                  Text('Email: admin@quizmaster.com'),
-                                  Text('Password: admin123'),
-                                  SizedBox(height: 14),
                                   Text(
-                                    'Demo Student Account',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    'Create your first account with Sign Up.',
                                   ),
                                   SizedBox(height: 8),
-                                  Text('Email: student@quizmaster.com'),
-                                  Text('Password: student123'),
+                                  Text(
+                                    'Choose Admin if this is the account that will manage questions and exam settings.',
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'After that, students can create their own accounts from the same screen.',
+                                  ),
                                 ],
                               ),
                             ),

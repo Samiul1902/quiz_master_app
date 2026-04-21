@@ -76,9 +76,9 @@ class ExamSettings {
   }
 
   factory ExamSettings.fromJson(Map<String, dynamic> json) {
-    final questionCount = json['questionCount'] as int? ?? 5;
-    final storedDuration = json['examDurationMinutes'] as int?;
-    final oldPerQuestionSeconds = json['timePerQuestion'] as int?;
+    final questionCount = (json['questionCount'] as num?)?.toInt() ?? 5;
+    final storedDuration = (json['examDurationMinutes'] as num?)?.toInt();
+    final oldPerQuestionSeconds = (json['timePerQuestion'] as num?)?.toInt();
     final migratedDuration =
         storedDuration ??
         ((questionCount * (oldPerQuestionSeconds ?? 20)) / 60).ceil().clamp(
@@ -87,12 +87,13 @@ class ExamSettings {
         );
 
     return ExamSettings(
-      examVersion: json['examVersion'] as int? ?? 1,
+      examVersion: (json['examVersion'] as num?)?.toInt() ?? 1,
       examTitle: json['examTitle'] as String? ?? 'Weekly Mock Exam',
       questionCount: questionCount,
       examDurationMinutes: migratedDuration,
       showExamReview: json['showExamReview'] as bool? ?? true,
-      maxExamAttemptsPerStudent: json['maxExamAttemptsPerStudent'] as int? ?? 0,
+      maxExamAttemptsPerStudent:
+          (json['maxExamAttemptsPerStudent'] as num?)?.toInt() ?? 0,
       practiceEnabled: json['practiceEnabled'] as bool? ?? true,
       showAnswersInPractice: json['showAnswersInPractice'] as bool? ?? true,
       shuffleQuestions: json['shuffleQuestions'] as bool? ?? true,
