@@ -7,9 +7,14 @@ import 'package:quiz_master_app/widgets/progress_visualization.dart';
 import 'package:quiz_master_app/widgets/user_avatar.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({super.key, required this.controller});
+  const AdminDashboardScreen({
+    super.key,
+    required this.controller,
+    this.showProfileShortcut = true,
+  });
 
   final AppController controller;
+  final bool showProfileShortcut;
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
@@ -235,15 +240,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
         actions: [
-          IconButton(
-            onPressed: _openProfile,
-            icon: UserAvatar(
-              name: user.name,
-              photoUrl: user.photoUrl,
-              radius: 16,
+          if (widget.showProfileShortcut)
+            IconButton(
+              onPressed: _openProfile,
+              icon: UserAvatar(
+                name: user.name,
+                photoUrl: user.photoUrl,
+                radius: 16,
+              ),
+              tooltip: 'Profile',
             ),
-            tooltip: 'Profile',
-          ),
           TextButton.icon(
             onPressed: controller.logout,
             icon: const Icon(Icons.logout_rounded),

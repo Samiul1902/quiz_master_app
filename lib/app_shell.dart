@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_master_app/controllers/app_controller.dart';
-import 'package:quiz_master_app/screens/admin_dashboard_screen.dart';
 import 'package:quiz_master_app/screens/auth_screen.dart';
-import 'package:quiz_master_app/screens/home_screen.dart';
+import 'package:quiz_master_app/screens/main_navigation_shell.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.controller});
@@ -30,11 +29,7 @@ class AppShell extends StatelessWidget {
           return AuthScreen(controller: controller);
         }
 
-        if (user.isAdmin) {
-          return AdminDashboardScreen(controller: controller);
-        }
-
-        return HomeScreen(controller: controller);
+        return MainNavigationShell(controller: controller);
       },
     );
   }
